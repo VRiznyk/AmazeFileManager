@@ -29,9 +29,23 @@ public class AppListLoader extends AsyncTaskLoader<AppListLoader.AppsDataPair> {
     private PackageReceiver packageReceiver;
     private AppsDataPair mApps;
     private int sortBy, asc;
+    private final List<String> mExcludedPackages;
+
 
     public AppListLoader(Context context, int sortBy, int asc) {
         super(context);
+
+        mExcludedPackages = new ArrayList<>();
+        mExcludedPackages.add("com.dnake.desktop");
+        mExcludedPackages.add("com.dnake.eSettings");
+        mExcludedPackages.add("com.dnake.d400");
+        mExcludedPackages.add("com.android.soundrecorder");
+        mExcludedPackages.add("com.android.calendar");
+        mExcludedPackages.add("com.android.contacts");
+        mExcludedPackages.add("com.softwinner.explore");
+        mExcludedPackages.add("com.google.android.gms");
+        mExcludedPackages.add("com.android.email");
+        mExcludedPackages.add("com.android.vending");
 
         this.sortBy = sortBy;
         this.asc = asc;
@@ -55,6 +69,8 @@ public class AppListLoader extends AsyncTaskLoader<AppListLoader.AppsDataPair> {
         mApps = new AppsDataPair(new ArrayList<>(apps.size()), new ArrayList<>(apps.size()));
 
         for (ApplicationInfo object : apps) {
+            if (mExcludedPackages.contains(object.packageName)) continue;
+
             File sourceDir = new File(object.sourceDir);
 
             String label = object.loadLabel(packageManager).toString();
@@ -62,6 +78,7 @@ public class AppListLoader extends AsyncTaskLoader<AppListLoader.AppsDataPair> {
 
             try {
                 info = packageManager.getPackageInfo(object.packageName, 0);
+
             } catch (PackageManager.NameNotFoundException e) {
                 e.printStackTrace();
                 info = null;
